@@ -1,4 +1,5 @@
 <?php
+
 /**
  * MTN MoMo API Configuration
  * DEEPNEXIS Ltd - Production
@@ -9,8 +10,11 @@ require_once __DIR__ . '/vendor/autoload.php';
 use Dotenv\Dotenv;
 
 // Load environment variables
-$dotenv = Dotenv::createImmutable(__DIR__);
-$dotenv->load();
+if (file_exists(__DIR__ . '/.env')) {
+    $dotenv = Dotenv::createImmutable(__DIR__);
+    $dotenv->load();
+}
+
 
 // Environment settings
 define('ENVIRONMENT', $_ENV['MOMO_ENVIRONMENT'] ?? 'sandbox');

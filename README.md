@@ -1,10 +1,10 @@
-# MTN MoMo API - DEEPNEXIS Ltd
+# MTN MoMo API - DEEPNEXIS TECH Ltd
 
 ## Clean, Professional, Postman-Ready Implementation
 
 ### 🎯 Overview
 
-This is a clean, professional implementation of the MTN MoMo API for Rwanda production environment. All code is optimized for testing with Postman using your phone number **250782752491** with **REAL MONEY**.
+This is a clean, professional implementation of the MTN MoMo API for Rwanda production environment. All code is optimized for testing with Postman using your phone number **250782752491** or any other with **REAL MONEY**.
 
 ---
 
@@ -36,9 +36,9 @@ composer install
 
 Your `.env` file is already configured with your credentials:
 
-- ✅ Collection Key: 2bfc85f27df14fc18f6b2bda8639732a
-- ✅ Disbursement Key: 43a217b615874b9698f9794de7a43417
-- ✅ API User: 8f399903-38c6-4f89-9c91-8ffb53760998
+- ✅ Collection Key: xxx `(subcription key given by mtn support team)`
+- ✅ Disbursement Key: xxx `(subcription key given by mtn support team)`
+- ✅ API User: xxx `(generated from mtn partners dashboard)`
 - ✅ Test Phone: 250782752491 `You can changes this number to any active mtn rwanda phone number you may like`
 - ✅ Environment: Production (Rwanda)
 

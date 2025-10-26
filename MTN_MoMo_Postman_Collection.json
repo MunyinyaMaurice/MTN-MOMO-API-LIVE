@@ -7,7 +7,7 @@
   "variable": [
     {
       "key": "base_url",
-      "value": "http://localhost/momo",
+      "value": "https://mtn-momo-api-live-production.up.railway.app",
       "type": "string"
     },
     {

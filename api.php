@@ -1,4 +1,5 @@
 <?php
+
 /**
  * MTN MoMo API - Postman Ready Endpoints
  * DEEPNEXIS Ltd - Production API
@@ -30,14 +31,16 @@ $path = $_GET['action'] ?? '';
 $input = json_decode(file_get_contents('php://input'), true) ?? [];
 
 // Response helper
-function sendResponse($data, $code = 200) {
+function sendResponse($data, $code = 200)
+{
     http_response_code($code);
     echo json_encode($data, JSON_PRETTY_PRINT);
     exit();
 }
 
 // Error handler
-function sendError($message, $code = 400, $details = null) {
+function sendError($message, $code = 400, $details = null)
+{
     $response = [
         'success' => false,
         'error' => $message,
@@ -50,11 +53,11 @@ function sendError($message, $code = 400, $details = null) {
 try {
     // Route requests
     switch ($path) {
-        
+
         // ============================================================
         // COLLECTION API ENDPOINTS
         // ============================================================
-        
+
         case 'collection/token':
             // Get access token
             $collection = new MoMoCollection(COLLECTION_CONFIG);
@@ -65,7 +68,7 @@ try {
                 'timestamp' => date('Y-m-d H:i:s')
             ]);
             break;
-            
+
         case 'collection/balance':
             // Get account balance
             $collection = new MoMoCollection(COLLECTION_CONFIG);
@@ -77,13 +80,13 @@ try {
                 'timestamp' => date('Y-m-d H:i:s')
             ]);
             break;
-            
+
         case 'collection/request-to-pay':
             // Request payment from customer
             if ($method !== 'POST') {
                 sendError('POST method required', 405);
             }
-            
+
             // Validate required fields
             $required = ['amount', 'phone', 'external_id'];
             foreach ($required as $field) {
@@ -91,7 +94,7 @@ try {
                     sendError("Missing required field: $field", 400);
                 }
             }
-            
+
             $collection = new MoMoCollection(COLLECTION_CONFIG);
             $result = $collection->requestToPay(
                 $input['amount'],
@@ -102,7 +105,7 @@ try {
                 $input['payee_note'] ?? 'Payment',
                 $input['callback_url'] ?? null
             );
-            
+
             sendResponse([
                 'success' => $result['response']['http_code'] === 202,
                 'reference_id' => $result['referenceId'],
@@ -113,17 +116,17 @@ try {
                 'timestamp' => date('Y-m-d H:i:s')
             ]);
             break;
-            
+
         case 'collection/transaction-status':
             // Get transaction status
             $referenceId = $input['reference_id'] ?? $_GET['reference_id'] ?? null;
             if (!$referenceId) {
                 sendError('reference_id is required', 400);
             }
-            
+
             $collection = new MoMoCollection(COLLECTION_CONFIG);
             $result = $collection->getTransactionStatus($referenceId);
-            
+
             sendResponse([
                 'success' => $result['http_code'] === 200,
                 'reference_id' => $referenceId,
@@ -132,17 +135,17 @@ try {
                 'timestamp' => date('Y-m-d H:i:s')
             ]);
             break;
-            
+
         case 'collection/account-active':
             // Check if account is active
             $phone = $input['phone'] ?? $_GET['phone'] ?? null;
             if (!$phone) {
                 sendError('phone number is required', 400);
             }
-            
+
             $collection = new MoMoCollection(COLLECTION_CONFIG);
             $result = $collection->isAccountActive($phone);
-            
+
             sendResponse([
                 'success' => $result['http_code'] === 200,
                 'phone' => $phone,
@@ -151,17 +154,17 @@ try {
                 'timestamp' => date('Y-m-d H:i:s')
             ]);
             break;
-            
+
         case 'collection/account-info':
             // Get account holder info
             $phone = $input['phone'] ?? $_GET['phone'] ?? null;
             if (!$phone) {
                 sendError('phone number is required', 400);
             }
-            
+
             $collection = new MoMoCollection(COLLECTION_CONFIG);
             $result = $collection->getAccountHolderInfo($phone);
-            
+
             sendResponse([
                 'success' => $result['http_code'] === 200,
                 'phone' => $phone,
@@ -170,11 +173,11 @@ try {
                 'timestamp' => date('Y-m-d H:i:s')
             ]);
             break;
-            
+
         // ============================================================
         // DISBURSEMENT API ENDPOINTS
         // ============================================================
-        
+
         case 'disbursement/token':
             // Get access token
             $disbursement = new MoMoDisbursement(DISBURSEMENT_CONFIG);
@@ -185,7 +188,7 @@ try {
                 'timestamp' => date('Y-m-d H:i:s')
             ]);
             break;
-            
+
         case 'disbursement/balance':
             // Get account balance
             $disbursement = new MoMoDisbursement(DISBURSEMENT_CONFIG);
@@ -197,13 +200,13 @@ try {
                 'timestamp' => date('Y-m-d H:i:s')
             ]);
             break;
-            
+
         case 'disbursement/transfer':
             // Transfer money to customer
             if ($method !== 'POST') {
                 sendError('POST method required', 405);
             }
-            
+
             // Validate required fields
             $required = ['amount', 'phone', 'external_id'];
             foreach ($required as $field) {
@@ -211,7 +214,7 @@ try {
                     sendError("Missing required field: $field", 400);
                 }
             }
-            
+
             $disbursement = new MoMoDisbursement(DISBURSEMENT_CONFIG);
             $result = $disbursement->transfer(
                 $input['amount'],
@@ -222,7 +225,7 @@ try {
                 $input['payee_note'] ?? 'Payment transfer',
                 $input['callback_url'] ?? null
             );
-            
+
             sendResponse([
                 'success' => $result['response']['http_code'] === 202,
                 'reference_id' => $result['referenceId'],
@@ -233,17 +236,17 @@ try {
                 'timestamp' => date('Y-m-d H:i:s')
             ]);
             break;
-            
+
         case 'disbursement/transaction-status':
             // Get transaction status
             $referenceId = $input['reference_id'] ?? $_GET['reference_id'] ?? null;
             if (!$referenceId) {
                 sendError('reference_id is required', 400);
             }
-            
+
             $disbursement = new MoMoDisbursement(DISBURSEMENT_CONFIG);
             $result = $disbursement->getTransactionStatus($referenceId);
-            
+
             sendResponse([
                 'success' => $result['http_code'] === 200,
                 'reference_id' => $referenceId,
@@ -252,23 +255,23 @@ try {
                 'timestamp' => date('Y-m-d H:i:s')
             ]);
             break;
-            
+
         // ============================================================
         // TEST & UTILITY ENDPOINTS
         // ============================================================
-        
+
         case 'test/payment':
             // Complete payment test (request + wait + status check)
             if ($method !== 'POST') {
                 sendError('POST method required', 405);
             }
-            
+
             $phone = $input['phone'] ?? '250782752491';
             $amount = $input['amount'] ?? '100';
             $externalId = 'test_' . time();
-            
+
             $collection = new MoMoCollection(COLLECTION_CONFIG);
-            
+
             // Request payment
             $result = $collection->requestToPay(
                 $amount,
@@ -278,21 +281,21 @@ try {
                 'Test payment',
                 'Testing MTN MoMo'
             );
-            
+
             if ($result['response']['http_code'] !== 202) {
                 sendError('Payment request failed', 400, $result);
             }
-            
+
             $referenceId = $result['referenceId'];
-            
+
             // Wait and check status
             $maxAttempts = 30; // 60 seconds (30 attempts * 2 seconds)
             $status = 'PENDING';
-            
+
             for ($i = 0; $i < $maxAttempts; $i++) {
                 sleep(2);
                 $statusResult = $collection->getTransactionStatus($referenceId);
-                
+
                 if (isset($statusResult['data']['status'])) {
                     $status = $statusResult['data']['status'];
                     if (in_array($status, ['SUCCESSFUL', 'FAILED', 'REJECTED'])) {
@@ -300,7 +303,7 @@ try {
                     }
                 }
             }
-            
+
             sendResponse([
                 'success' => $status === 'SUCCESSFUL',
                 'reference_id' => $referenceId,
@@ -313,14 +316,14 @@ try {
                 'timestamp' => date('Y-m-d H:i:s')
             ]);
             break;
-            
+
         case 'verify':
             // Verify credentials and configuration
             $collection = new MoMoCollection(COLLECTION_CONFIG);
             $disbursement = new MoMoDisbursement(DISBURSEMENT_CONFIG);
-            
+
             $tests = [];
-            
+
             // Test 1: Collection token
             try {
                 $collection->getAccessToken();
@@ -328,7 +331,7 @@ try {
             } catch (Exception $e) {
                 $tests['collection_auth'] = 'FAIL: ' . $e->getMessage();
             }
-            
+
             // Test 2: Collection balance
             try {
                 $balanceResult = $collection->getAccountBalance();
@@ -336,7 +339,7 @@ try {
             } catch (Exception $e) {
                 $tests['collection_balance'] = 'FAIL: ' . $e->getMessage();
             }
-            
+
             // Test 3: Disbursement token
             try {
                 $disbursement->getAccessToken();
@@ -344,7 +347,7 @@ try {
             } catch (Exception $e) {
                 $tests['disbursement_auth'] = 'FAIL: ' . $e->getMessage();
             }
-            
+
             // Test 4: Disbursement balance
             try {
                 $balanceResult = $disbursement->getAccountBalance();
@@ -352,11 +355,11 @@ try {
             } catch (Exception $e) {
                 $tests['disbursement_balance'] = 'FAIL: ' . $e->getMessage();
             }
-            
-            $allPassed = !in_array(false, array_map(function($v) {
+
+            $allPassed = !in_array(false, array_map(function ($v) {
                 return strpos($v, 'PASS') !== false;
             }, $tests));
-            
+
             sendResponse([
                 'success' => $allPassed,
                 'environment' => ENVIRONMENT,
@@ -367,7 +370,7 @@ try {
                 'timestamp' => date('Y-m-d H:i:s')
             ]);
             break;
-            
+
         case '':
         case 'help':
             // API documentation
@@ -399,11 +402,10 @@ try {
                 'currency' => CURRENCY
             ]);
             break;
-            
+
         default:
             sendError('Invalid action. Use ?action=help for API documentation', 404);
     }
-    
 } catch (Exception $e) {
     sendError($e->getMessage(), 500, [
         'file' => basename($e->getFile()),

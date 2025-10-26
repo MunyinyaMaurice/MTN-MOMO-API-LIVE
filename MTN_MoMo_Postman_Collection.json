@@ -1,0 +1,333 @@
+{
+  "info": {
+    "name": "MTN MoMo API - DEEPNEXIS Ltd",
+    "description": "Complete MTN MoMo API collection for Rwanda production environment",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost/momo",
+      "type": "string"
+    },
+    {
+      "key": "test_phone",
+      "value": "250782752491",
+      "type": "string"
+    },
+    {
+      "key": "test_amount",
+      "value": "100",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "0. API Documentation",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api.php?action=help",
+          "host": ["{{base_url}}"],
+          "path": ["api.php"],
+          "query": [
+            {
+              "key": "action",
+              "value": "help"
+            }
+          ]
+        },
+        "description": "Get complete API documentation and available endpoints"
+      }
+    },
+    {
+      "name": "1. Verify Credentials",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api.php?action=verify",
+          "host": ["{{base_url}}"],
+          "path": ["api.php"],
+          "query": [
+            {
+              "key": "action",
+              "value": "verify"
+            }
+          ]
+        },
+        "description": "Test all credentials and verify API connectivity"
+      }
+    },
+    {
+      "name": "Collection API",
+      "item": [
+        {
+          "name": "Get Collection Token",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api.php?action=collection/token",
+              "host": ["{{base_url}}"],
+              "path": ["api.php"],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "collection/token"
+                }
+              ]
+            },
+            "description": "Get access token for Collection API"
+          }
+        },
+        {
+          "name": "Get Collection Balance",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api.php?action=collection/balance",
+              "host": ["{{base_url}}"],
+              "path": ["api.php"],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "collection/balance"
+                }
+              ]
+            },
+            "description": "Get current account balance for Collection account"
+          }
+        },
+        {
+          "name": "Check Account Active",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api.php?action=collection/account-active&phone={{test_phone}}",
+              "host": ["{{base_url}}"],
+              "path": ["api.php"],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "collection/account-active"
+                },
+                {
+                  "key": "phone",
+                  "value": "{{test_phone}}"
+                }
+              ]
+            },
+            "description": "Check if a phone number has an active MoMo account"
+          }
+        },
+        {
+          "name": "Get Account Info",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api.php?action=collection/account-info&phone={{test_phone}}",
+              "host": ["{{base_url}}"],
+              "path": ["api.php"],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "collection/account-info"
+                },
+                {
+                  "key": "phone",
+                  "value": "{{test_phone}}"
+                }
+              ]
+            },
+            "description": "Get account holder basic information"
+          }
+        },
+        {
+          "name": "Request Payment (Request to Pay)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": \"{{test_amount}}\",\n  \"phone\": \"{{test_phone}}\",\n  \"external_id\": \"test_{{$timestamp}}\",\n  \"currency\": \"RWF\",\n  \"payer_message\": \"Payment for testing\",\n  \"payee_note\": \"Test transaction\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api.php?action=collection/request-to-pay",
+              "host": ["{{base_url}}"],
+              "path": ["api.php"],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "collection/request-to-pay"
+                }
+              ]
+            },
+            "description": "Request payment from customer (REAL MONEY - Use small amounts for testing)"
+          }
+        },
+        {
+          "name": "Get Transaction Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api.php?action=collection/transaction-status&reference_id=YOUR_REFERENCE_ID",
+              "host": ["{{base_url}}"],
+              "path": ["api.php"],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "collection/transaction-status"
+                },
+                {
+                  "key": "reference_id",
+                  "value": "YOUR_REFERENCE_ID",
+                  "description": "Replace with actual reference_id from payment request"
+                }
+              ]
+            },
+            "description": "Check the status of a payment transaction"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Disbursement API",
+      "item": [
+        {
+          "name": "Get Disbursement Token",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api.php?action=disbursement/token",
+              "host": ["{{base_url}}"],
+              "path": ["api.php"],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "disbursement/token"
+                }
+              ]
+            },
+            "description": "Get access token for Disbursement API"
+          }
+        },
+        {
+          "name": "Get Disbursement Balance",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api.php?action=disbursement/balance",
+              "host": ["{{base_url}}"],
+              "path": ["api.php"],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "disbursement/balance"
+                }
+              ]
+            },
+            "description": "Get current account balance for Disbursement account"
+          }
+        },
+        {
+          "name": "Transfer Money",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": \"100\",\n  \"phone\": \"{{test_phone}}\",\n  \"external_id\": \"transfer_{{$timestamp}}\",\n  \"currency\": \"RWF\",\n  \"payer_message\": \"Transfer payment\",\n  \"payee_note\": \"Money transfer\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api.php?action=disbursement/transfer",
+              "host": ["{{base_url}}"],
+              "path": ["api.php"],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "disbursement/transfer"
+                }
+              ]
+            },
+            "description": "Send money to a customer (REAL MONEY)"
+          }
+        },
+        {
+          "name": "Get Transfer Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api.php?action=disbursement/transaction-status&reference_id=YOUR_REFERENCE_ID",
+              "host": ["{{base_url}}"],
+              "path": ["api.php"],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "disbursement/transaction-status"
+                },
+                {
+                  "key": "reference_id",
+                  "value": "YOUR_REFERENCE_ID",
+                  "description": "Replace with actual reference_id from transfer request"
+                }
+              ]
+            },
+            "description": "Check the status of a transfer transaction"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Testing",
+      "item": [
+        {
+          "name": "Complete Payment Test",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"{{test_phone}}\",\n  \"amount\": \"{{test_amount}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api.php?action=test/payment",
+              "host": ["{{base_url}}"],
+              "path": ["api.php"],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "test/payment"
+                }
+              ]
+            },
+            "description": "Complete end-to-end payment test (request + wait + status check) - REAL MONEY"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+    "timestamp": "2025-10-27 01:02:30",
+    "type": "received",
+    "data": {
+        "headers": {
+            "Content-Type": "application/json",
+            "User-Agent": "PostmanRuntime/7.49.0",
+            "Accept": "*/*",
+            "Cache-Control": "no-cache",
+            "Postman-Token": "dd12c215-6ca5-49e2-a84b-36aa9f428da3",
+            "Host": "localhost:8080",
+            "Accept-Encoding": "gzip, deflate, br",
+            "Connection": "keep-alive",
+            "Content-Length": "182"
+        },
+        "body": {
+            "referenceId": "test-123",
+            "status": "SUCCESSFUL",
+            "amount": "100",
+            "currency": "RWF",
+            "externalId": "order_456",
+            "financialTransactionId": "789"
+        }
+    },
+    "ip": "::1",
+    "user_agent": "PostmanRuntime/7.49.0"
+}
+---

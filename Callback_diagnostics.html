@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Callback Diagnostics - DEEPNEXIS</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+        }
+
+        .alert {
+            background: #fef2f2;
+            border-left: 4px solid #ef4444;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            color: #991b1b;
+        }
+
+        .alert strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .card h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+
+        .card p {
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .btn {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            width: 100%;
+            text-align: center;
+        }
+
+        .btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: #10b981;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-warning {
+            background: #f59e0b;
+        }
+
+        .btn-warning:hover {
+            background: #d97706;
+        }
+
+        .btn-info {
+            background: #3b82f6;
+        }
+
+        .btn-info:hover {
+            background: #2563eb;
+        }
+
+        .result {
+            background: #f9fafb;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .result.show {
+            display: block;
+        }
+
+        .result pre {
+            background: #1f2937;
+            color: #f9fafb;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 10px;
+        }
+
+        .status-pass {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-fail {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .info-box {
+            background: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .info-box strong {
+            color: #1e40af;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .info-box p {
+            color: #1e3a8a;
+            margin: 0;
+        }
+
+        code {
+            background: #f3f4f6;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 13px;
+            color: #dc2626;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 MTN MoMo Callback Diagnostics</h1>
+            <p>DEEPNEXIS Ltd - Production Environment</p>
+        </div>
+
+        <div class="alert">
+            <strong>⚠️ Why You're Not Receiving Callbacks</strong>
+            <p>MTN Production requires <strong>Provider Callback Host</strong> configuration. This is different from the X-Callback-Url header in your code. You must configure this in MTN Partners Portal or contact MTN support.</p>
+        </div>
+
+        <div class="info-box">
+            <strong>Your Callback URL:</strong>
+            <p><code id="callback-url">Loading...</code></p>
+        </div>
+
+        <div class="grid">
+            <!-- Accessibility Check -->
+            <div class="card">
+                <h2>🌐 Check Accessibility</h2>
+                <p>Verify that your callback endpoint is publicly accessible and can receive requests from MTN.</p>
+                <button class="btn btn-success" onclick="runTest('check-accessibility', 'accessibility-result')">
+                    Run Accessibility Test
+                </button>
+                <div id="accessibility-result" class="result"></div>
+            </div>
+
+            <!-- Simulate Callback -->
+            <div class="card">
+                <h2>🧪 Simulate Callback</h2>
+                <p>Send a fake MTN callback to test if your callback.php is processing correctly.</p>
+                <button class="btn btn-warning" onclick="runTest('test-callback', 'simulate-result')">
+                    Send Test Callback
+                </button>
+                <div id="simulate-result" class="result"></div>
+            </div>
+
+            <!-- View Logs -->
+            <div class="card">
+                <h2>📋 View Callback Logs</h2>
+                <p>Check recent callback attempts to see if MTN has been sending callbacks.</p>
+                <button class="btn btn-info" onclick="runTest('view-logs', 'logs-result')">
+                    View Recent Logs
+                </button>
+                <div id="logs-result" class="result"></div>
+            </div>
+
+            <!-- Provider Callback Info -->
+            <div class="card">
+                <h2>ℹ️ Provider Callback Info</h2>
+                <p>Learn about Provider Callback Host and how to configure it with MTN.</p>
+                <button class="btn" onclick="runTest('provider-callback-info', 'info-result')">
+                    Show Configuration Guide
+                </button>
+                <div id="info-result" class="result"></div>
+            </div>
+
+            <!-- Check Permissions -->
+            <div class="card">
+                <h2>🔐 Check Permissions</h2>
+                <p>Verify that log directories have proper write permissions.</p>
+                <button class="btn" onclick="runTest('check-permissions', 'permissions-result')">
+                    Check Permissions
+                </button>
+                <div id="permissions-result" class="result"></div>
+            </div>
+
+            <!-- Quick Reference -->
+            <div class="card">
+                <h2>📚 Setup Guide</h2>
+                <p>View the complete callback setup guide with step-by-step instructions.</p>
+                <a href="CALLBACK_SETUP_GUIDE.md" target="_blank" class="btn btn-success">
+                    Open Setup Guide
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get callback URL on page load
+        window.onload = function() {
+            fetch('callback-test.php?action=help')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.callback_endpoint) {
+                        document.getElementById('callback-url').textContent = data.callback_endpoint;
+                    }
+                });
+        };
+
+        function runTest(action, resultId) {
+            const resultDiv = document.getElementById(resultId);
+            resultDiv.innerHTML = '<div class="loading"><div class="spinner"></div>Running test...</div>';
+            resultDiv.classList.add('show');
+
+            fetch(`callback-test.php?action=${action}`)
+                .then(response => response.json())
+                .then(data => {
+                    let html = '';
+
+                    // Add status badge if available
+                    if (data.status || data.overall_status) {
+                        const status = data.status || data.overall_status;
+                        const badgeClass = status === 'PASS' ? 'status-pass' :
+                            status === 'FAIL' ? 'status-fail' :
+                            'status-pending';
+                        html += `<span class="status-badge ${badgeClass}">${status}</span>`;
+                    }
+
+                    // Add message if available
+                    if (data.message) {
+                        html += `<p><strong>${data.message}</strong></p>`;
+                    }
+
+                    // Format the JSON response
+                    html += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+
+                    resultDiv.innerHTML = html;
+                })
+                .catch(error => {
+                    resultDiv.innerHTML = `
+                        <span class="status-badge status-fail">ERROR</span>
+                        <p><strong>Request failed</strong></p>
+                        <pre>${error.message}</pre>
+                    `;
+                });
+        }
+    </script>
+</body>
+
+</html>

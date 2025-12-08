@@ -159,7 +159,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"amount\": \"{{test_amount}}\",\n  \"phone\": \"{{test_phone}}\",\n  \"external_id\": \"test_{{$timestamp}}\",\n  \"currency\": \"RWF\",\n  \"payer_message\": \"Payment for testing\",\n  \"payee_note\": \"Test transaction\"\n}"
+              "raw": "{\n  \"amount\": \"{{test_amount}}\",\n  \"phone\": \"{{test_phone}}\",\n  \"external_id\": \"test_{{$timestamp}}\",\n  \"currency\": \"RWF\",\n  \"payer_message\": \"Payment for testing\",\n  \"payee_note\": \"Test transaction\",\n \"callback_url\": \"https://mtn-momo-api-live-production.up.railway.app/callback.php\"\n"
             },
             "url": {
               "raw": "{{base_url}}/api.php?action=collection/request-to-pay",

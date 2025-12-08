@@ -1,27 +1,61 @@
 <?php
 
-// OLD VERSION
-
 /**
- * MTN MoMo Webhook/Callback Receiver
+ * MTN MoMo Webhook/Callback Receiver - ENHANCED VERSION
  * DEEPNEXIS Ltd - Production
  * 
  * This endpoint receives payment notifications from MTN MoMo API
- * when transactions complete (success, failure, or rejection)
+ * Includes enhanced logging and diagnostics
  */
 
 // Load configuration
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/transaction_logger.php';
 
-// Log directory setup
+// CRITICAL: Log directory setup (with proper permissions)
 $logDir = __DIR__ . '/logs';
 if (!is_dir($logDir)) {
-    mkdir($logDir, 0755, true);
+    mkdir($logDir, 0777, true);
+    chmod($logDir, 0777);
 }
 
 $logFile = $logDir . '/callbacks.log';
 $errorLog = $logDir . '/callback_errors.log';
+$debugLog = $logDir . '/callback_debug.log';
+
+// Ensure log files exist with write permissions
+foreach ([$logFile, $errorLog, $debugLog] as $file) {
+    if (!file_exists($file)) {
+        touch($file);
+        chmod($file, 0666);
+    }
+}
+
+/**
+ * Enhanced logging function
+ */
+function logDebug($message, $data = [])
+{
+    global $debugLog;
+
+    $logEntry = [
+        'timestamp' => date('Y-m-d H:i:s.u'),
+        'message' => $message,
+        'data' => $data,
+        'server' => [
+            'method' => $_SERVER['REQUEST_METHOD'] ?? 'unknown',
+            'uri' => $_SERVER['REQUEST_URI'] ?? 'unknown',
+            'ip' => $_SERVER['REMOTE_ADDR'] ?? 'unknown',
+            'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? 'unknown'
+        ]
+    ];
+
+    @file_put_contents(
+        $debugLog,
+        json_encode($logEntry, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n---\n",
+        FILE_APPEND | LOCK_EX
+    );
+}
 
 /**
  * Log callback data
@@ -31,17 +65,17 @@ function logCallback($type, $data)
     global $logFile;
 
     $logEntry = [
-        'timestamp' => date('Y-m-d H:i:s'),
+        'timestamp' => date('Y-m-d H:i:s.u'),
         'type' => $type,
         'data' => $data,
         'ip' => $_SERVER['REMOTE_ADDR'] ?? 'unknown',
         'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? 'unknown'
     ];
 
-    file_put_contents(
+    @file_put_contents(
         $logFile,
         json_encode($logEntry, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n---\n",
-        FILE_APPEND
+        FILE_APPEND | LOCK_EX
     );
 }
 
@@ -53,15 +87,15 @@ function logError($message, $context = [])
     global $errorLog;
 
     $errorEntry = [
-        'timestamp' => date('Y-m-d H:i:s'),
+        'timestamp' => date('Y-m-d H:i:s.u'),
         'error' => $message,
         'context' => $context
     ];
 
-    file_put_contents(
+    @file_put_contents(
         $errorLog,
         json_encode($errorEntry, JSON_PRETTY_PRINT) . "\n---\n",
-        FILE_APPEND
+        FILE_APPEND | LOCK_EX
     );
 }
 
@@ -80,15 +114,32 @@ function sendResponse($success, $message = '', $code = 200)
     exit();
 }
 
+// Log ALL incoming requests (even GET requests for testing)
+logDebug('Incoming request', [
+    'method' => $_SERVER['REQUEST_METHOD'],
+    'headers' => getallheaders(),
+    'query' => $_GET,
+    'raw_input' => file_get_contents('php://input')
+]);
+
 try {
-    // Only accept POST requests
+    // Handle GET requests (for testing accessibility)
+    if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+        logDebug('GET request received - callback endpoint is accessible');
+        sendResponse(true, 'Callback endpoint is accessible and working. Waiting for MTN POST callbacks.', 200);
+    }
+
+    // Only accept POST requests for actual callbacks
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         logError('Invalid request method', ['method' => $_SERVER['REQUEST_METHOD']]);
-        sendResponse(false, 'Only POST method allowed', 405);
+        sendResponse(false, 'Only POST method allowed for callbacks', 405);
     }
 
     // Get raw callback data
     $rawInput = file_get_contents('php://input');
+
+    logDebug('POST request body', ['raw_input' => $rawInput]);
+
     if (empty($rawInput)) {
         logError('Empty request body');
         sendResponse(false, 'Empty request body', 400);
@@ -127,16 +178,31 @@ try {
     $financialTransactionId = $callbackData['financialTransactionId'] ?? null;
     $reason = $callbackData['reason'] ?? null;
 
-    // Log to transaction logger
-    $logger = new TransactionLogger();
-    $logger->logCallback($referenceId, $status, [
+    logDebug('Parsed callback data', [
+        'reference_id' => $referenceId,
+        'status' => $status,
         'amount' => $amount,
-        'currency' => $currency,
-        'external_id' => $externalId,
-        'financial_transaction_id' => $financialTransactionId,
-        'reason' => $reason,
-        'callback_time' => date('Y-m-d H:i:s')
+        'external_id' => $externalId
     ]);
+
+    // Log to transaction logger
+    try {
+        $logger = new TransactionLogger();
+        $logger->logCallback($referenceId, $status, [
+            'amount' => $amount,
+            'currency' => $currency,
+            'external_id' => $externalId,
+            'financial_transaction_id' => $financialTransactionId,
+            'reason' => $reason,
+            'callback_time' => date('Y-m-d H:i:s')
+        ]);
+        logDebug('Callback logged to database successfully');
+    } catch (Exception $e) {
+        logError('Failed to log callback to database', [
+            'error' => $e->getMessage(),
+            'reference_id' => $referenceId
+        ]);
+    }
 
     // Process based on status
     switch ($status) {
@@ -165,10 +231,6 @@ try {
             ]);
 
             // TODO: Handle failed payment
-            // Examples:
-            // - Notify customer of failure
-            // - Update order status to "payment failed"
-            // - Log for manual review
 
             break;
 
@@ -180,10 +242,6 @@ try {
             ]);
 
             // TODO: Handle rejected payment
-            // Examples:
-            // - Notify customer they rejected payment
-            // - Cancel pending order
-            // - Free up reserved inventory
 
             break;
 
@@ -192,8 +250,6 @@ try {
                 'reference_id' => $referenceId,
                 'external_id' => $externalId
             ]);
-
-            // Typically you won't get PENDING callbacks, but handle just in case
             break;
 
         default:
@@ -202,16 +258,16 @@ try {
     }
 
     // ALWAYS respond with 200 OK to acknowledge receipt
-    // If you don't, MTN will retry the callback multiple times
+    logDebug('Sending 200 OK response');
     sendResponse(true, 'Callback received and processed', 200);
 } catch (Exception $e) {
     logError('Exception in callback handler', [
         'message' => $e->getMessage(),
         'file' => $e->getFile(),
-        'line' => $e->getLine()
+        'line' => $e->getLine(),
+        'trace' => $e->getTraceAsString()
     ]);
 
     // Still send 200 OK to avoid retries for processing errors
-    // But log the error for investigation
     sendResponse(true, 'Callback received but processing error occurred', 200);
 }
